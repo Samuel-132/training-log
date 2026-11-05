@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/build-service-worker.mjs",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "vitest run",
-    "check": "tsc -b && vitest run"
+    "test": "vitest run && node --test scripts/service-worker.test.mjs",
+    "check": "tsc -b && npm test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "idb": "^8.0.3",
