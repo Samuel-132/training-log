@@ -38,6 +38,8 @@ import { ExerciseEditor } from './components/ExerciseEditor'
 import { EntryEditor } from './components/EntryEditor'
 import { ProgressChart } from './components/ProgressChart'
 import { ExerciseLibrary } from './components/ExerciseLibrary'
+import { InstallPanel } from './components/InstallPanel'
+import { usePwa } from './usePwa'
 
 type Tab = 'exercises' | 'history' | 'settings'
 type Confirmation = {
@@ -54,6 +56,7 @@ const tabs = [
 ]
 
 export default function App() {
+  const pwa = usePwa()
   const [data, setData] = useState<TrainingData>()
   const [loadError, setLoadError] = useState('')
   const [tab, setTab] = useState<Tab>('exercises')
@@ -289,11 +292,33 @@ export default function App() {
             </strong>
           </span>
           <div className="connection-state">
-            {online ? <Wifi size={14} /> : <WifiOff size={14} />}
-            <span>{online ? 'En ligne' : 'Hors ligne'}</span>
+            {!online ? (
+              <WifiOff size={14} />
+            ) : pwa.status === 'ready' ? (
+              <Check size={14} />
+            ) : (
+              <Wifi size={14} />
+            )}
+            <span>
+              {!online ? 'Hors ligne' : pwa.status === 'ready' ? 'Prêt hors ligne' : 'En ligne'}
+            </span>
           </div>
         </header>
         <main id="main-content" tabIndex={-1}>
+          {pwa.updateAvailable && !entryEditor && !exerciseEditor && !confirmation && (
+            <div className="pwa-update" role="status">
+              <span>
+                Une nouvelle version de Training Log est prête. Votre carnet sera conservé.
+              </span>
+              <button
+                className="button secondary"
+                disabled={pwa.updating}
+                onClick={pwa.applyUpdate}
+              >
+                {pwa.updating ? 'Mise à jour…' : 'Recharger l’app'}
+              </button>
+            </div>
+          )}
           {loadError ? (
             <div className="panel loading-error">
               <HardDrive size={32} />
@@ -551,6 +576,7 @@ export default function App() {
                     <p>Sauvegardez vos efforts. Emportez votre progression.</p>
                   </section>
                   <div className="settings-grid">
+                    <InstallPanel status={pwa.status} />
                     <section className="panel settings-panel">
                       <span className="settings-icon">
                         <ShieldCheck size={26} />
